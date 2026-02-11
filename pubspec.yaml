@@ -41,6 +41,9 @@ dependencies:
   file_picker: ^10.3.7
   dotted_border: ^2.0.0
   image_picker: ^1.0.1
+  intl: ^0.18.1
+  open_filex: ^4.7.0
+  share_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

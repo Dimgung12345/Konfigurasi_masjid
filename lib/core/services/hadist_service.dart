@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 
 class HadistService {
   final Dio _dio = ApiService.instance.client;
+  final ApiService _api = ApiService.instance;
 
   /// Ambil hadist global dengan pagination
-  Future<List<Hadist>> getGlobalHadists({int page = 1, int limit = 10}) async {
-    final response = await _dio.get(
+  Future<List<Hadist>> getGlobalHadists({int page = 1, int limit = 10, bool forceRefresh = false}) async {
+    final response = await _api.get(
       "/tenant/hadist",
       queryParameters: {
         "limit": limit,
         "offset": (page - 1) * limit,
       },
+      forceRefresh: forceRefresh,
     );
     debugPrint("📦 Raw global hadists JSON page $page: ${response.data}");
     final data = response.data as List;

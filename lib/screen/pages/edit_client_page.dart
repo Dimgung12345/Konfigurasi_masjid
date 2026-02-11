@@ -145,20 +145,31 @@ class _EditMasterClientPageState extends State<EditMasterClientPage>
     }
 
     return Scaffold(
-      appBar: AppBar(
-      title: const Text("Kembali"),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context, 'dashboard'),
-        ),
-        bottom: TabBar(
+appBar: AppBar(
+  title: const Text("Kembali"),
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back),
+    onPressed: () => Navigator.pop(context, 'dashboard'),
+  ),
+  bottom: PreferredSize(
+    preferredSize: const Size.fromHeight(48),
+    child: Column(
+      children: [
+        TabBar(
           controller: _tabController,
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: "Data Masjid"),
             Tab(text: "Data File"),
           ],
         ),
-      ),
+        const Divider(height: 1, color: Colors.white), // ✅ garis pemisah
+      ],
+    ),
+  ),
+),
       body: Column(
         children: [
           Expanded(
