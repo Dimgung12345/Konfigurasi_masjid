@@ -18,6 +18,7 @@ class _BannerPageState extends State<BannerPage> {
   final _service = clientBannerService;
   List<ClientBanner> _banners = [];
   bool _loading = true;
+  bool _error = false;
 
   @override
   void initState() {
@@ -31,10 +32,17 @@ class _BannerPageState extends State<BannerPage> {
       setState(() {
         _banners = data;
         _loading = false;
+        _error = false;
       });
     } catch (e) {
       debugPrint("❌ Error load banners: $e");
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _error = true;
+      });
+        ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Koneksi terputus, cek Internet Anda")),
+      );
     }
   }
 
@@ -69,7 +77,12 @@ class _BannerPageState extends State<BannerPage> {
           },
         ),
       ),
-      body: _loading
+        body: _error
+            ? ListView.builder(
+                itemCount: 3,
+                itemBuilder: (_, __) => const SkeletonBannerCard(),
+              ):
+            _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [

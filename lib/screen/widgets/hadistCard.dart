@@ -74,3 +74,29 @@ class HadistCard extends StatelessWidget {
     );
   }
 }
+
+class SkeletonHadistCard extends StatelessWidget {
+  const SkeletonHadistCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Placeholder konten hadist
+          Container(height: 16, width: double.infinity, color: Colors.grey.shade400),
+          const SizedBox(height: 12),
+          // Placeholder riwayat/kitab
+          Container(height: 14, width: 150, color: Colors.grey.shade400),
+        ],
+      ),
+    );
+  }
+}

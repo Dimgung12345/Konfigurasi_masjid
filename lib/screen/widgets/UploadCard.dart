@@ -58,3 +58,21 @@ class UploadCard extends StatelessWidget {
     );
   }
 }
+
+class SkeletonBannerCard extends StatelessWidget {
+  final double height;
+  const SkeletonBannerCard({super.key, this.height = 180});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      width: double.infinity,
+      height: height,
+    );
+  }
+}

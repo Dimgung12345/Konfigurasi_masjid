@@ -17,9 +17,10 @@ class _HadistPageState extends State<HadistPage> {
   final _service = HadistService();
   List<Map<String, dynamic>> _merged = [];
   bool _loading = true;
+  bool _error = false;
 
   int _currentPage = 1;
-  int _totalPages = 5; // misalnya fixed dulu, bisa dari API
+  int _totalPages = 54; // misalnya fixed dulu, bisa dari API
 
   @override
   void initState() {
@@ -60,11 +61,18 @@ class _HadistPageState extends State<HadistPage> {
       setState(() {
         _merged = merged;
         _loading = false;
+        _error = false;
         _currentPage = page;
       });
     } catch (e) {
       debugPrint("❌ Error load hadist: $e");
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _error = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Koneksi terputus, cek Internet Anda")),
+      );
     }
   }
 
@@ -119,7 +127,12 @@ class _HadistPageState extends State<HadistPage> {
 
           // Konten utama
           Expanded(
-            child: ListView.separated(
+            child: _error
+            ? ListView.builder(
+              itemCount: 5,
+              itemBuilder: (_, __) => const SkeletonHadistCard(),
+            ) : 
+            ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: _merged.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -140,26 +153,72 @@ class _HadistPageState extends State<HadistPage> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_totalPages, (i) {
-                final page = i + 1;
-                return GestureDetector(
-                  onTap: () => _loadHadists(page: page),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentPage == page
-                          ? Colors.orange
-                          : Colors.grey.shade400,
+              children: [
+                // Prev arrow
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _currentPage > 1
+                      ? () => _loadHadists(page: _currentPage - 1)
+                      : null,
+                ),
+
+                // Current ±1 (3 angka aktif)
+                for (int i = _currentPage - 1; i <= _currentPage + 1; i++)
+                  if (i >= 1 && i <= _totalPages)
+                    TextButton(
+                      onPressed: () => _loadHadists(page: i),
+                      child: Text(
+                        "$i",
+                        style: TextStyle(
+                          fontWeight: _currentPage == i ? FontWeight.bold : FontWeight.normal,
+                          color: _currentPage == i ? Colors.orange : Colors.black,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              }),
+
+                // Satu indikator "..." sebagai search page
+                TextButton(
+                  onPressed: () async {
+                    final page = await showDialog<int>(
+                      context: context,
+                      builder: (ctx) {
+                        final controller = TextEditingController();
+                        return AlertDialog(
+                          title: const Text("Lompat ke halaman"),
+                          content: TextField(
+                            controller: controller,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(hintText: "Masukkan nomor halaman"),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                final val = int.tryParse(controller.text);
+                                Navigator.pop(ctx, val);
+                              },
+                              child: const Text("OK"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (page != null && page >= 1 && page <= _totalPages) {
+                      _loadHadists(page: page);
+                    }
+                  },
+                  child: const Text("..."),
+                ),
+
+                // Next arrow
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: _currentPage < _totalPages
+                      ? () => _loadHadists(page: _currentPage + 1)
+                      : null,
+                ),
+              ],
             ),
           ),
-
           // Save button
           SafeArea(
             child: Padding(

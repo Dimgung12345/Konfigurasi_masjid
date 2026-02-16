@@ -63,6 +63,9 @@ class _EditMasterClientPageState extends State<EditMasterClientPage>
     } catch (e) {
       debugPrint("❌ Error fetch client: $e");
       setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Koneksi terputus, cek Internet Anda")),
+        );
     }
   }
 

@@ -15,15 +15,15 @@ class _MainPageState extends State<MainPage> {
   late PageController _pageController;
 
   final _pages = [
+    const FinanceReportPage(),  // Laporan Keuangan
     const FinanceCardsPage(),   // Rekening
     const MonthlyRecapPage(),   // Rekap Bulanan
-    const FinanceReportPage(),  // Laporan Keuangan
   ];
 
   final _titles = [
+    "Laporan Keuangan",
     "Daftar Rekening",
     "Rekap Bulanan",
-    "Laporan Keuangan",
   ];
 
   @override
@@ -74,9 +74,9 @@ class _MainPageState extends State<MainPage> {
           );
         },
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Laporan"),
           BottomNavigationBarItem(icon: Icon(Icons.account_balance), label: "Rekening"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Rekap"),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Laporan"),
         ],
       ),
     );
