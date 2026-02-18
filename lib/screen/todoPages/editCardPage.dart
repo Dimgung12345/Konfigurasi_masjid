@@ -44,7 +44,7 @@ class _EditCardPageState extends State<EditCardPage> {
         status: _statusValue,
         current_balance: int.tryParse(_balanceCtrl.text),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 

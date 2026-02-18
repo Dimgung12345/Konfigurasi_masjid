@@ -50,3 +50,38 @@ class MonthlyRecapCard extends StatelessWidget {
     );
   }
 }
+
+class SkeletonMonthlyRecapCard extends StatelessWidget {
+  const SkeletonMonthlyRecapCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 150, height: 16, color: Colors.grey.shade300),
+            const SizedBox(height: 8),
+            Container(width: 200, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 200, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 200, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(width: 60, height: 20, color: Colors.grey.shade300),
+                const SizedBox(width: 8),
+                Container(width: 100, height: 32, color: Colors.grey.shade300),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

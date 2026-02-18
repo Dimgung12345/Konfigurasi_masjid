@@ -5,12 +5,9 @@ class ApiService {
   final Dio _dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  // cache in-memory
-  final Map<String, _CacheEntry> _cache = {};
-
   ApiService._internal()
       : _dio = Dio(BaseOptions(
-          baseUrl: "http://192.168.1.7:8080",
+          baseUrl: "http://192.168.1.3:8080",
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         )) {
@@ -43,31 +40,10 @@ class ApiService {
 
   Dio get client => _dio;
 
-  // GET dengan caching
+  // GET tanpa cache
   Future<Response> get(String endpoint,
-      {Map<String, dynamic>? queryParameters,
-      Duration ttl = const Duration(minutes: 5),
-      bool forceRefresh = false}) async {
-    final cacheKey = "$endpoint?${queryParameters?.toString() ?? ''}";
-
-    // cek cache
-    if (!forceRefresh && _cache.containsKey(cacheKey)) {
-      final entry = _cache[cacheKey]!;
-      if (DateTime.now().isBefore(entry.expiry)) {
-        return Response(
-          requestOptions: RequestOptions(path: endpoint),
-          data: entry.data,
-          statusCode: 200,
-        );
-      } else {
-        _cache.remove(cacheKey); // expired
-      }
-    }
-
-    // fetch dari server
-    final res = await _dio.get(endpoint, queryParameters: queryParameters);
-    _cache[cacheKey] = _CacheEntry(res.data, DateTime.now().add(ttl));
-    return res;
+      {Map<String, dynamic>? queryParameters}) async {
+    return await _dio.get(endpoint, queryParameters: queryParameters);
   }
 
   Future<Response> post(String endpoint, Map<String, dynamic> data) async =>
@@ -78,15 +54,4 @@ class ApiService {
 
   Future<Response> delete(String endpoint) async =>
       await _dio.delete(endpoint);
-
-  // invalidate cache untuk endpoint tertentu
-  void invalidate(String endpoint) {
-    _cache.removeWhere((key, _) => key.startsWith(endpoint));
-  }
-}
-
-class _CacheEntry {
-  final dynamic data;
-  final DateTime expiry;
-  _CacheEntry(this.data, this.expiry);
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-
+import '../widgets/DisconectWidget.dart';
 import '../../core/services/banner_service.dart';
 import '../../core/models/client_baner.dart';
 import '../widgets/UploadCard.dart';
@@ -19,6 +19,7 @@ class _BannerPageState extends State<BannerPage> {
   List<ClientBanner> _banners = [];
   bool _loading = true;
   bool _error = false;
+  bool showSkeleton = true;
 
   @override
   void initState() {
@@ -27,6 +28,27 @@ class _BannerPageState extends State<BannerPage> {
   }
 
   Future<void> _loadBanners() async {
+    setState(() {
+      _loading = true;
+      _error = false;
+      showSkeleton = false;
+    });
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (_loading && mounted) {
+        setState(() => showSkeleton = true);
+      }
+    });
+
+    Future.delayed(const Duration(seconds: 5), () {
+      if (_loading && mounted) {
+        setState(() {
+          _error = true;
+          _loading = false;
+        });
+      }
+    });
+
     try {
       final data = await _service.getBanners();
       setState(() {
@@ -78,10 +100,12 @@ class _BannerPageState extends State<BannerPage> {
         ),
       ),
         body: _error
-            ? ListView.builder(
-                itemCount: 3,
-                itemBuilder: (_, __) => const SkeletonBannerCard(),
-              ):
+            ? ConnectionErrorWidget(onRetry: _loadBanners)
+             : _loading && showSkeleton
+                ? ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (_, __) => const SkeletonBannerCard(),
+                  ) :
             _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(

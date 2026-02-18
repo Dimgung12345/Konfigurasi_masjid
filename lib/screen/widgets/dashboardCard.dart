@@ -67,3 +67,70 @@ class SettingItem extends StatelessWidget {
     );
   }
 }
+
+class SkeletonDashboardPage extends StatelessWidget {
+  const SkeletonDashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Judul dashboard skeleton
+          Container(
+            width: 120,
+            height: 20,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 16),
+
+          // Card skeleton (4 item)
+          for (int i = 0; i < 4; i++) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 16,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 80,
+                          height: 14,
+                          color: Colors.grey.shade300,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.black26),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

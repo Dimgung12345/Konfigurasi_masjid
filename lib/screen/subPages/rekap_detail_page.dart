@@ -7,6 +7,7 @@ import '../../core/services/finance_service.dart';
 import '../widgets/finance/transaksi_table.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
+import '../widgets/DisconectWidget.dart';
 
 class MonthlyRecapDetailPage extends StatefulWidget {
   final MonthlyBalance recap;
@@ -22,6 +23,8 @@ class _MonthlyRecapDetailPageState extends State<MonthlyRecapDetailPage> {
   List<FinancialTransaction> _transactions = [];
   List<FinanceCard> _cards = [];
   bool _loading = true;
+  bool _error = false;
+  bool showSkeleton = false;
 
   @override
   void initState() {
@@ -29,15 +32,45 @@ class _MonthlyRecapDetailPageState extends State<MonthlyRecapDetailPage> {
     _loadTransactions();
   }
 
-  Future<void> _loadTransactions() async {
-    final txs = await _service.getTransactions(widget.recap.month);
-    final cards = await _service.getCards();
+Future<void> _loadTransactions() async {
     setState(() {
-      _transactions = txs;
-      _cards = cards;
-      _loading = false;
+      _loading = true;
+      _error = false;
+      showSkeleton = false;
     });
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (_loading && mounted) setState(() => showSkeleton = true);
+    });
+
+    Future.delayed(const Duration(seconds: 5), () {
+      if (_loading && mounted) {
+        setState(() {
+          _error = true;
+          _loading = false;
+        });
+      }
+    });
+
+    try {
+      final txs = await _service.getTransactions(widget.recap.month);
+      final cards = await _service.getCards();
+      setState(() {
+        _transactions = txs;
+        _cards = cards;
+        _loading = false;
+        _error = false;
+        showSkeleton = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = true;
+        showSkeleton = true;
+      });
+    }
   }
+
 
 Future<void> _showSuccessDialog(String filePath) async {
   showDialog(
@@ -84,7 +117,14 @@ Future<void> _showSuccessDialog(String filePath) async {
 
     return Scaffold(
       appBar: AppBar(title: Text("Rekap ${r.month}")),
-      body: _loading
+      body: _error
+            ? ConnectionErrorWidget(onRetry: _loadTransactions)
+              : _loading && showSkeleton
+                  ? ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (_, __) => const SkeletonTransactionCard(),
+                    ) :
+              _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.all(12),

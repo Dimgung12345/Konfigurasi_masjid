@@ -28,3 +28,29 @@ Widget build(BuildContext context) {
   );
 }
 }
+
+class SkeletonBalanceSummary extends StatelessWidget {
+  const SkeletonBalanceSummary({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 200, height: 18, color: Colors.grey.shade300),
+            const SizedBox(height: 8),
+            Container(width: 160, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 160, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 160, height: 14, color: Colors.grey.shade300),
+          ],
+        ),
+      ),
+    );
+  }
+}

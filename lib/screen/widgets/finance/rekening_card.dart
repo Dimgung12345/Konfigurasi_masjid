@@ -65,3 +65,35 @@ class FinanceCardWidget extends StatelessWidget {
     );
   }
 }
+
+class SkeletonFinanceCard extends StatelessWidget {
+  const SkeletonFinanceCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 120, height: 16, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 180, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 140, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(width: 80, height: 32, color: Colors.grey.shade300),
+                const SizedBox(width: 8),
+                Container(width: 80, height: 32, color: Colors.grey.shade300),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

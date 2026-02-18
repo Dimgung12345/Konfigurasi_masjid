@@ -1,3 +1,5 @@
+import 'package:dashboard_masjid/screen/widgets/DisconectWidget.dart';
+import 'package:dashboard_masjid/screen/widgets/finance/realtime_saldo.dart';
 import 'package:flutter/material.dart';
 import '../../core/services/finance_service.dart';
 import '../../core/models/data_transakasi.dart';
@@ -16,10 +18,13 @@ class FinanceReportPage extends StatefulWidget {
 
 class _FinanceReportPageState extends State<FinanceReportPage> {
   final FinanceService _service = FinanceService();
+  bool _loadingBalance = true;
+  bool _loadingTx = true;
+  bool _error = false;
+  bool showSkeleton = false;
+  Balance? _balance;
   List<FinancialTransaction> _transactions = [];
   List<FinanceCard> _cards = [];
-  Balance? _balance;
-  bool _loading = true;
 
   @override
   void initState() {
@@ -30,8 +35,32 @@ class _FinanceReportPageState extends State<FinanceReportPage> {
   final currencyFormat = NumberFormat.currency(locale: 'id', symbol: 'Rp', decimalDigits: 0);
 
 Future<void> _loadData() async {
+  setState(() {
+    _loadingBalance = true;
+    _loadingTx = true;
+    _error = false;
+    showSkeleton = false;
+  });
+
+  // Skeleton muncul kalau loading > 1 detik
+  Future.delayed(const Duration(seconds: 1), () {
+    if ((_loadingBalance || _loadingTx) && mounted) {
+      setState(() => showSkeleton = true);
+    }
+  });
+
+  // Error page muncul kalau loading > 5 detik
+  Future.delayed(const Duration(seconds: 5), () {
+    if ((_loadingBalance || _loadingTx) && mounted) {
+      setState(() {
+        _error = true;
+        _loadingBalance = false;
+        _loadingTx = false;
+      });
+    }
+  });
+
   try {
-    // ambil bulan aktif (YYYY-MM)
     final now = DateTime.now();
     final monthParam = DateFormat("yyyy-MM").format(now);
 
@@ -43,20 +72,43 @@ Future<void> _loadData() async {
       _transactions = txs;
       _balance = bal;
       _cards = cards;
-      _loading = false;
+      _loadingBalance = false;
+      _loadingTx = false;
+      _error = false;
+      showSkeleton = false;
     });
   } catch (e) {
-    setState(() => _loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Gagal memuat data keuangan")),
-    );
+    setState(() {
+      _loadingBalance = false;
+      _loadingTx = false;
+      _error = true;
+      showSkeleton = true;
+    });
   }
 }
 
   @override
   Widget build(BuildContext context) {
+      if (_error) {
+    return ConnectionErrorWidget(onRetry: _loadData);
+  }
+
+  if ((_loadingBalance || _loadingTx) && showSkeleton) {
+    return SingleChildScrollView(
+      child: Column(
+        children: const [
+          SkeletonBalanceSummary(),
+          SizedBox(height: 8),
+          SkeletonTransactionCard(),
+          SkeletonTransactionCard(),
+          SkeletonTransactionCard(),
+        ],
+      ),
+    );
+  }
+
     return Scaffold(
-      body: _loading
+      body: _loadingBalance || _loadingTx
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Column(

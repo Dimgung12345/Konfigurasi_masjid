@@ -5,6 +5,7 @@ import '../../core/models/hadistdto.dart';
 import '../../core/services/hadist_service.dart';
 import '../widgets/hadistCard.dart';
 import '../widgets/SaveButton.dart';
+import '../widgets/DisconectWidget.dart';
 
 class HadistPage extends StatefulWidget {
   const HadistPage({super.key});
@@ -18,6 +19,7 @@ class _HadistPageState extends State<HadistPage> {
   List<Map<String, dynamic>> _merged = [];
   bool _loading = true;
   bool _error = false;
+  bool showSkeleton = true;
 
   int _currentPage = 1;
   int _totalPages = 54; // misalnya fixed dulu, bisa dari API
@@ -28,53 +30,78 @@ class _HadistPageState extends State<HadistPage> {
     _loadHadists();
   }
 
-  Future<void> _loadHadists({int page = 1}) async {
-    try {
-      final global = await _service.getGlobalHadists(page: page);
-      final clientDTOs = await _service.getClientHadists(page: page);
+Future<void> _loadHadists({int page = 1}) async {
+  setState(() {
+    _loading = true;
+    _error = false;
+    showSkeleton = false;
+  });
 
-      final merged = <Map<String, dynamic>>[];
-      for (var h in global) {
-        final dto = clientDTOs.firstWhere(
-          (x) => x.id == h.id,
-          orElse: () => HadistDTO(
-            id: h.id,
-            konten: h.konten,
-            riwayat: h.riwayat,
-            kitab: h.kitab,
-            enabled: true,
-          ),
-        );
-
-        final c = ClientHadist(
-          id: 0,
-          clientId: "",
-          hadistId: dto.id,
-          disabled: !dto.enabled,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-
-        merged.add({"hadist": h, "client": c});
-      }
-
-      setState(() {
-        _merged = merged;
-        _loading = false;
-        _error = false;
-        _currentPage = page;
-      });
-    } catch (e) {
-      debugPrint("❌ Error load hadist: $e");
-      setState(() {
-        _loading = false;
-        _error = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Koneksi terputus, cek Internet Anda")),
-      );
+  // Skeleton muncul kalau loading > 1 detik
+  Future.delayed(const Duration(seconds: 1), () {
+    if (_loading && mounted) {
+      setState(() => showSkeleton = true);
     }
+  });
+
+  // Error page muncul kalau loading > 5 detik
+  Future.delayed(const Duration(seconds: 5), () {
+    if (_loading && mounted) {
+      setState(() {
+        _error = true;
+        _loading = false;
+      });
+    }
+  });
+
+  try {
+    final global = await _service.getGlobalHadists(page: page);
+    final clientDTOs = await _service.getClientHadists(page: page);
+
+    final merged = <Map<String, dynamic>>[];
+    for (var h in global) {
+      final dto = clientDTOs.firstWhere(
+        (x) => x.id == h.id,
+        orElse: () => HadistDTO(
+          id: h.id,
+          konten: h.konten,
+          riwayat: h.riwayat,
+          kitab: h.kitab,
+          enabled: true,
+        ),
+      );
+
+      final c = ClientHadist(
+        id: 0,
+        clientId: "",
+        hadistId: dto.id,
+        disabled: !dto.enabled,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      merged.add({"hadist": h, "client": c});
+    }
+
+    setState(() {
+      _merged = merged;
+      _loading = false;
+      _error = false;
+      showSkeleton = false;
+      _currentPage = page;
+    });
+  } catch (e) {
+    debugPrint("❌ Error load hadist: $e");
+    setState(() {
+      _loading = false;
+      _error = true;
+      showSkeleton = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Koneksi terputus, cek Internet Anda")),
+    );
   }
+}
 
   Future<void> _toggleHadist(ClientHadist clientHadist, bool disabled) async {
     try {
@@ -128,10 +155,12 @@ class _HadistPageState extends State<HadistPage> {
           // Konten utama
           Expanded(
             child: _error
-            ? ListView.builder(
-              itemCount: 5,
-              itemBuilder: (_, __) => const SkeletonHadistCard(),
-            ) : 
+            ? ConnectionErrorWidget(onRetry: () => _loadHadists(page: _currentPage))
+            : _loading && showSkeleton
+                ? ListView.builder(
+                    itemCount: 5,
+                    itemBuilder: (_, __) => const SkeletonHadistCard(),
+                  ) :
             ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: _merged.length,

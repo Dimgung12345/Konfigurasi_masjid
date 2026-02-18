@@ -41,3 +41,31 @@ class TransactionCardWidget extends StatelessWidget {
     );
   }
 }
+
+class SkeletonTransactionCard extends StatelessWidget {
+  const SkeletonTransactionCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 100, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 160, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 200, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 120, height: 14, color: Colors.grey.shade300),
+            const SizedBox(height: 4),
+            Container(width: 140, height: 14, color: Colors.grey.shade300),
+          ],
+        ),
+      ),
+    );
+  }
+}
